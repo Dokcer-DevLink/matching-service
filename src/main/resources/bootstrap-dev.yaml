@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    config:
+      uri: http://127.0.0.1:8888
+      name: matching-service
+    kubernetes:
+      enabled: false
+      config:
+        enabled: false
+      discovery:
+        enabled: false
