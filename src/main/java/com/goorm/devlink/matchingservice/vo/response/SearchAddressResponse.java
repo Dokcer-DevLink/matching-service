@@ -8,11 +8,13 @@ import java.util.List;
 @Builder
 @Getter
 public class SearchAddressResponse {
-    List<String> addressList;
+    String place;
+    String address;
 
-    public static SearchAddressResponse getInstance(List<String> addressList){
+    public static SearchAddressResponse getInstance(String place,String address ){
         return SearchAddressResponse.builder()
-                .addressList(addressList)
+                .place(place)
+                .address(address)
                 .build();
     }
 }

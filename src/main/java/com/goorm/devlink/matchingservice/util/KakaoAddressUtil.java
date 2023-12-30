@@ -1,9 +1,12 @@
 package com.goorm.devlink.matchingservice.util;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.goorm.devlink.matchingservice.config.properties.vo.KakaoAddressVo;
+import com.goorm.devlink.matchingservice.dto.AddressDto;
+import com.goorm.devlink.matchingservice.vo.response.SearchAddressResponse;
 import io.netty.util.CharsetUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -23,12 +26,17 @@ public class KakaoAddressUtil {
     private final KakaoAddressVo kakaoAddressVo;
     private final RestTemplate restTemplate;
 
-    public List<String> findAddressList(String location){
+    public List<SearchAddressResponse> findAddressList(String location){
         // 에러처리 필요
         String response = restTemplate.exchange(request(location),String.class).getBody();
         return parseResponse(response);
 
     }
+    
+//    public AddressDto getAddressInfo(String location){
+//        String response = restTemplate.exchange(request(location),String.class).getBody();
+//
+//    }
 
     private RequestEntity request(String location){
         return new RequestEntity(headers(), HttpMethod.GET,url(location));
@@ -46,7 +54,7 @@ public class KakaoAddressUtil {
                 .build()
                 .toUri();
     }
-    private List<String> parseResponse(String response){
+    private List<SearchAddressResponse> parseResponse(String response){
         return convertJsonArrayToList(getJsonArray(response));
     }
 
@@ -56,15 +64,27 @@ public class KakaoAddressUtil {
         return parsedResponse.get("documents").getAsJsonArray();
     }
 
-    private List<String> convertJsonArrayToList(JsonArray jsonArray){
-        List<String> result = new ArrayList<>();
+    private List<SearchAddressResponse> convertJsonArrayToList(JsonArray jsonArray){
+        List<SearchAddressResponse> result = new ArrayList<>();
         jsonArray.forEach(jsonElement -> {
-            String address = jsonElement.getAsJsonObject().get("address")
-                    .getAsJsonObject().get("address_name")
-                    .toString().replaceAll("\"","");
-            result.add(address);
+            String place = getValue(jsonElement.getAsJsonObject(),"place_name");
+            String address = getValue(jsonElement.getAsJsonObject(),"address_name");
+            result.add(SearchAddressResponse.getInstance(place,address));
         });
         return result;
     }
+
+    private String getValue(JsonObject jsonObject, String key){
+        return  jsonObject.get(key).toString().replaceAll("\"","");
+    }
+
+//    private List<String> convertJsonArrayToList(JsonObject jsonObject){
+//        JsonObject data = jsonObject.get("address").getAsJsonObject();
+//                    .get("address_name")
+//                    .toString().replaceAll("\"","");
+//            result.add(address);
+//
+//        return result;
+//    }
 
 }
