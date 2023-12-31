@@ -10,10 +10,7 @@ import com.goorm.devlink.matchingservice.vo.request.EmptyScheduleRequest;
 import com.goorm.devlink.matchingservice.vo.request.MatchingRequest;
 import com.goorm.devlink.matchingservice.vo.request.MentoringApplyRequest;
 import com.goorm.devlink.matchingservice.vo.request.PostMatchingRequest;
-import com.goorm.devlink.matchingservice.vo.response.ApplySimpleResponse;
-import com.goorm.devlink.matchingservice.vo.response.EmptyScheduleResponse;
-import com.goorm.devlink.matchingservice.vo.response.PostMatchingResponse;
-import com.goorm.devlink.matchingservice.vo.response.SearchPlaceResponse;
+import com.goorm.devlink.matchingservice.vo.response.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,22 +37,27 @@ public class MatchingController {
     }
 
     @GetMapping("/api/matching")
-    public ResponseEntity doAutoMatch(@RequestBody @Valid MatchingRequest matchingRequest, @RequestHeader("userUuid") String userUuid){
+    public ResponseEntity<MatchingResponse> doAutoMatch(@RequestBody @Valid MatchingRequest matchingRequest,
+                                                        @RequestHeader("userUuid") String userUuid){
+
         if(userUuid.isEmpty()) { throw new NoSuchElementException("userUuid는 필수값입니다."); }
 
-        //1. Post에서 매칭데이터 가져오기
+        //1. Post에서 매칭에 적합한 게시글 정보 가져오기
         List<PostMatchingResponse> postResponse = getPostMatchingResponse(matchingRequest,userUuid);
-       // if(postResponse.size() == 0) { return "요청에 적합한 멘토링 게시글이 존재하지 않습니다."; }
+       if(postResponse.size() == 0) {
+           throw  new IllegalArgumentException("요청에 적합한 게시글이 존재하지 않습니다."); }
 
-        //2. Profile에서 매칭데이터 가져오기
+        //2. Profile에서 스케줄에 적합한 유저 정보 가져오기
         EmptyScheduleResponse scheduleResponse = getScheduleResponse(matchingRequest,getPostUserList(postResponse));
-       // if(scheduleResponse.size() == 0) { return "요청을 적합한 대상이 존재하지 않습니다."; }
+       if(scheduleResponse.getUserUuidList().size() == 0) {
+           throw  new IllegalArgumentException("요청에 적합한 유저가 존재하지 않습니다."); }
 
-        //3. Mentoring에 멘토링 신청 전송하기
-        ApplySimpleResponse mentoringResponse = getMentoringResponse(postResponse,scheduleResponse,matchingRequest,userUuid);
+        //3. 우선순위가 가장 높은 유저에게 Mentoring 신청 보내기
+        String targetUuid = getTargetUuid(scheduleResponse);
+        String postUuid = getPostUuid(postResponse,targetUuid);
+        ApplySimpleResponse mentoringResponse = getMentoringResponse(postUuid,targetUuid,userUuid,matchingRequest);
 
-        return null;
-
+        return ResponseEntity.ok(MatchingResponse.getInstance(mentoringResponse.getApplyUuid(),targetUuid,postUuid));
     }
 
     private List<PostMatchingResponse> getPostMatchingResponse(MatchingRequest matchingRequest, String userUuid){
@@ -72,10 +74,9 @@ public class MatchingController {
                 )).getBody();
     }
 
-    private ApplySimpleResponse getMentoringResponse(List<PostMatchingResponse> postResponse,EmptyScheduleResponse scheduleResponse,
-                                                     MatchingRequest matchingRequest, String userUuid){
-        String targetUuid = getTargetUuid(scheduleResponse);
-        String postUuid = getPostUuid(postResponse,targetUuid);
+    private ApplySimpleResponse getMentoringResponse(String postUuid,String targetUuid, String userUuid,
+                                                     MatchingRequest matchingRequest){
+
         return mentoringServieClient.applyMentoring(
                 MentoringApplyRequest.getInstance(postUuid, targetUuid, matchingRequest),
                 userUuid
