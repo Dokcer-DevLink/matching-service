@@ -1,6 +1,7 @@
 package com.goorm.devlink.matchingservice.vo.request;
 
 import com.goorm.devlink.matchingservice.dto.Address;
+import com.goorm.devlink.matchingservice.vo.MatchingType;
 import com.goorm.devlink.matchingservice.vo.OnOffline;
 import com.goorm.devlink.matchingservice.vo.PostType;
 import lombok.Builder;
@@ -18,14 +19,24 @@ public class PostMatchingRequest {
     private PostType postType;
     private OnOffline onOffline;
 
-    public static PostMatchingRequest getInstance(List<String> stacks, PostType postType,
-                                                  Address address, OnOffline onOffline) {
+    public static PostMatchingRequest getInstance(List<String> stacks,
+                                                  Address address, MatchingRequest matchingRequest ) {
         return PostMatchingRequest.builder()
                 .stacks(stacks)
                 .address(address)
-                .postType(postType)
-                .onOffline(onOffline)
+                .postType(getPostType(matchingRequest))
+                .onOffline(getOnOffline(matchingRequest))
                 .build();
     }
+
+    private static PostType getPostType(MatchingRequest matchingRequest){
+        return ( matchingRequest.getMatchingType().equals(MatchingType.MENTOR))? PostType.MENTEE : PostType.MENTOR;
+    }
+
+    private static OnOffline getOnOffline(MatchingRequest matchingRequest){
+        return ( matchingRequest.getMentoringPlace() != null && !matchingRequest.getMentoringPlace().isEmpty()) ?
+                OnOffline.OFFLINE : OnOffline.ONLINE;
+    }
+
 
 }

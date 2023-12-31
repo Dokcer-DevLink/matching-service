@@ -17,8 +17,7 @@ public interface PostServiceClient {
     @GetMapping("/api/post/match")
     public ResponseEntity<List<PostMatchingResponse>> getPostMatchingData(@RequestBody PostMatchingRequest postMatchingRequest);
 
-    @GetMapping("/api/profile/enableUsers")
-    public ResponseEntity<EmptyScheduleResponse> findEnableUser(@RequestBody EmptyScheduleRequest emptyScheduleRequest);
+
 
 
 }

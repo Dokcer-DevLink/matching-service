@@ -2,14 +2,16 @@ package com.goorm.devlink.matchingservice.controller;
 
 
 import com.goorm.devlink.matchingservice.dto.Address;
+import com.goorm.devlink.matchingservice.feign.MentoringServieClient;
 import com.goorm.devlink.matchingservice.feign.PostServiceClient;
 import com.goorm.devlink.matchingservice.feign.ProfileServiceClient;
 import com.goorm.devlink.matchingservice.service.MatchingService;
-import com.goorm.devlink.matchingservice.vo.MatchingType;
-import com.goorm.devlink.matchingservice.vo.OnOffline;
-import com.goorm.devlink.matchingservice.vo.PostType;
+import com.goorm.devlink.matchingservice.vo.request.EmptyScheduleRequest;
 import com.goorm.devlink.matchingservice.vo.request.MatchingRequest;
+import com.goorm.devlink.matchingservice.vo.request.MentoringApplyRequest;
 import com.goorm.devlink.matchingservice.vo.request.PostMatchingRequest;
+import com.goorm.devlink.matchingservice.vo.response.ApplySimpleResponse;
+import com.goorm.devlink.matchingservice.vo.response.EmptyScheduleResponse;
 import com.goorm.devlink.matchingservice.vo.response.PostMatchingResponse;
 import com.goorm.devlink.matchingservice.vo.response.SearchPlaceResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class MatchingController {
     private final MatchingService matchingService;
     private final ProfileServiceClient profileServiceClient;
     private final PostServiceClient postServiceClient;
+    private final MentoringServieClient mentoringServieClient;
 
 
     @GetMapping("/api/matching/search")
@@ -38,40 +42,66 @@ public class MatchingController {
     @GetMapping("/api/matching")
     public ResponseEntity doAutoMatch(@RequestBody @Valid MatchingRequest matchingRequest, @RequestHeader("userUuid") String userUuid){
         if(userUuid.isEmpty()) { throw new NoSuchElementException("userUuid는 필수값입니다."); }
-        List<PostMatchingResponse> postMatchingData =
-                postServiceClient.getPostMatchingData(getPostMatchingRequest(userUuid, matchingRequest)).getBody();
 
-        //3  Profile에서 필터링된 userUuid 리스트 가져오기
+        //1. Post에서 매칭데이터 가져오기
+        List<PostMatchingResponse> postResponse = getPostMatchingResponse(matchingRequest,userUuid);
+       // if(postResponse.size() == 0) { return "요청에 적합한 멘토링 게시글이 존재하지 않습니다."; }
+
+        //2. Profile에서 매칭데이터 가져오기
+        EmptyScheduleResponse scheduleResponse = getScheduleResponse(matchingRequest,getPostUserList(postResponse));
+       // if(scheduleResponse.size() == 0) { return "요청을 적합한 대상이 존재하지 않습니다."; }
+
+        //3. Mentoring에 멘토링 신청 전송하기
+        ApplySimpleResponse mentoringResponse = getMentoringResponse(postResponse,scheduleResponse,matchingRequest,userUuid);
+
+        return null;
 
     }
 
-    private PostMatchingRequest getPostMatchingRequest(String userUuid, MatchingRequest matchingRequest){
-        return PostMatchingRequest.getInstance(
-                getStacks(userUuid),getPostType(matchingRequest),
-                getAddress(matchingRequest),getOnOffline(matchingRequest)
-        );
+    private List<PostMatchingResponse> getPostMatchingResponse(MatchingRequest matchingRequest, String userUuid){
+        return postServiceClient.getPostMatchingData(
+                PostMatchingRequest.getInstance(
+                        getStacks(userUuid), getAddress(matchingRequest), matchingRequest)
+                ).getBody();
+    }
+
+    private EmptyScheduleResponse getScheduleResponse(MatchingRequest matchingRequest, List<String> postUserList){
+        return profileServiceClient.findEnableUser(
+                EmptyScheduleRequest.getInstance(
+                        postUserList, matchingRequest.getStartTime(), matchingRequest.getUnitTimeCount()
+                )).getBody();
+    }
+
+    private ApplySimpleResponse getMentoringResponse(List<PostMatchingResponse> postResponse,EmptyScheduleResponse scheduleResponse,
+                                                     MatchingRequest matchingRequest, String userUuid){
+        String targetUuid = getTargetUuid(scheduleResponse);
+        String postUuid = getPostUuid(postResponse,targetUuid);
+        return mentoringServieClient.applyMentoring(
+                MentoringApplyRequest.getInstance(postUuid, targetUuid, matchingRequest),
+                userUuid
+        ).getBody();
+    }
+
+    private List<String> getPostUserList(List<PostMatchingResponse> postResponse){
+        return postResponse.stream().map(PostMatchingResponse::getUserUuid).collect(Collectors.toList());
+    }
+
+    private String getTargetUuid(EmptyScheduleResponse scheduleResponse){
+        return scheduleResponse.getUserUuidList().get(0);
     }
     private List<String> getStacks(String userUuid){
         return  profileServiceClient.viewUserStackList(userUuid).getBody();
     }
-    private OnOffline getOnOffline(MatchingRequest matchingRequest){
-        return ( matchingRequest.getMentoringPlace() != null && !matchingRequest.getMentoringPlace().isEmpty()) ?
-                OnOffline.OFFLINE : OnOffline.ONLINE;
-    }
+
     private Address getAddress(MatchingRequest matchingRequest){
         return ( matchingRequest.getMentoringPlace() != null && !matchingRequest.getMentoringPlace().isEmpty()) ?
                 matchingService.searchAddress(matchingRequest.getMentoringPlace()) : null;
     }
-    private PostType getPostType(MatchingRequest matchingRequest){
-        return ( matchingRequest.getMatchingType().equals(MatchingType.MENTOR))? PostType.MENTEE : PostType.MENTOR;
+
+    private String getPostUuid(List<PostMatchingResponse> postMatchingResponses, String targetUuid) {
+        return postMatchingResponses.stream().filter(response -> response.getUserUuid().equals(targetUuid))
+                .map(PostMatchingResponse::getPostUuid).findFirst().get();
     }
-
-
-
-
-
-
-
 
 
 
