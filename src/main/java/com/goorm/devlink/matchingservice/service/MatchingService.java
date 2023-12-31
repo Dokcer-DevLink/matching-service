@@ -1,12 +1,14 @@
 package com.goorm.devlink.matchingservice.service;
 
-import com.goorm.devlink.matchingservice.vo.response.SearchAddressResponse;
+import com.goorm.devlink.matchingservice.dto.Address;
+import com.goorm.devlink.matchingservice.vo.response.SearchPlaceResponse;
 
 import java.util.List;
 
 public interface MatchingService {
 
 
-    List<SearchAddressResponse> getAddressList(String location);
+    List<SearchPlaceResponse> searchPlaceList(String place);
 
+    Address searchAddress(String place);
 }

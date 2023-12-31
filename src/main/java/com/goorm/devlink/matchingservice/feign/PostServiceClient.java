@@ -1,6 +1,8 @@
 package com.goorm.devlink.matchingservice.feign;
 
+import com.goorm.devlink.matchingservice.vo.request.EmptyScheduleRequest;
 import com.goorm.devlink.matchingservice.vo.request.PostMatchingRequest;
+import com.goorm.devlink.matchingservice.vo.response.EmptyScheduleResponse;
 import com.goorm.devlink.matchingservice.vo.response.PostMatchingResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -14,5 +16,9 @@ public interface PostServiceClient {
 
     @GetMapping("/api/post/match")
     public ResponseEntity<List<PostMatchingResponse>> getPostMatchingData(@RequestBody PostMatchingRequest postMatchingRequest);
+
+    @GetMapping("/api/profile/enableUsers")
+    public ResponseEntity<EmptyScheduleResponse> findEnableUser(@RequestBody EmptyScheduleRequest emptyScheduleRequest);
+
 
 }
