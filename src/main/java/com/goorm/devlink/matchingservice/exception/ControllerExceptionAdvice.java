@@ -16,4 +16,11 @@ public class ControllerExceptionAdvice {
         return ResponseEntity.badRequest()
                 .body(ErrorResult.getInstance(exception.getMessage(), request.getRequestURL().toString()));
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResult> noSuchElementExceptionHandler(IllegalArgumentException exception,
+                                                                     HttpServletRequest request){
+        return ResponseEntity.badRequest()
+                .body(ErrorResult.getInstance(exception.getMessage(), request.getRequestURL().toString()));
+    }
 }
