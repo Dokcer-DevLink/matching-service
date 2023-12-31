@@ -32,7 +32,7 @@ public class MatchingController {
 
     @GetMapping("/api/matching/search")
     public ResponseEntity<List<SearchPlaceResponse>> searchLocation(@RequestParam String place){
-        if( place.isEmpty() ){ throw new NoSuchElementException("location은 필수값입니다."); }
+        if( place.isEmpty() ){ throw new NoSuchElementException("place는 필수값입니다."); }
         return ResponseEntity.ok(matchingService.searchPlaceList(place));
     }
 
@@ -47,7 +47,7 @@ public class MatchingController {
        if(postResponse.size() == 0) {
            throw  new IllegalArgumentException("요청에 적합한 게시글이 존재하지 않습니다."); }
 
-        //2. Profile에서 스케줄에 적합한 유저 정보 가져오기
+        //2. Profile에서 스케줄이 가능한 유저 정보 가져오기
         EmptyScheduleResponse scheduleResponse = getScheduleResponse(matchingRequest,getPostUserList(postResponse));
        if(scheduleResponse.getUserUuidList().size() == 0) {
            throw  new IllegalArgumentException("요청에 적합한 유저가 존재하지 않습니다."); }

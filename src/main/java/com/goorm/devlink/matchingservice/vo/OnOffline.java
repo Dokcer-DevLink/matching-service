@@ -1,5 +1,5 @@
 package com.goorm.devlink.matchingservice.vo;
 
-public enum OnOffline {
+public enum OnOffline  {
     ONLINE,OFFLINE;
 }

@@ -6,10 +6,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.checkerframework.checker.units.qual.A;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @Builder
-public class Address {
+public class Address implements Serializable {
 
     String addressName;
     Double addressX;

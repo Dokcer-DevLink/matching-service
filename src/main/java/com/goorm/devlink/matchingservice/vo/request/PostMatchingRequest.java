@@ -8,12 +8,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Getter
 @Setter
 @Builder
-public class PostMatchingRequest {
+public class PostMatchingRequest implements Serializable {
     private List<String> stacks;
     private Address address;
     private PostType postType;
@@ -23,7 +24,7 @@ public class PostMatchingRequest {
                                                   Address address, MatchingRequest matchingRequest ) {
         return PostMatchingRequest.builder()
                 .stacks(stacks)
-                .address(address)
+//                .address(address)
                 .postType(getPostType(matchingRequest))
                 .onOffline(getOnOffline(matchingRequest))
                 .build();
