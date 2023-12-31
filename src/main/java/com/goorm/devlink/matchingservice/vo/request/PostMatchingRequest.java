@@ -19,14 +19,16 @@ public class PostMatchingRequest implements Serializable {
     private Address address;
     private PostType postType;
     private OnOffline onOffline;
+    private String userUuid;
 
     public static PostMatchingRequest getInstance(List<String> stacks,
-                                                  Address address, MatchingRequest matchingRequest ) {
+                                                  Address address, MatchingRequest matchingRequest, String userUuid ) {
         return PostMatchingRequest.builder()
                 .stacks(stacks)
-//                .address(address)
+                .address(address)
                 .postType(getPostType(matchingRequest))
                 .onOffline(getOnOffline(matchingRequest))
+                .userUuid(userUuid)
                 .build();
     }
 

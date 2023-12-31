@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Builder
-public class Address implements Serializable {
+public class Address {
 
     String addressName;
     Double addressX;
