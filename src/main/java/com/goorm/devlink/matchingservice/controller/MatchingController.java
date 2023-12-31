@@ -36,7 +36,7 @@ public class MatchingController {
         return ResponseEntity.ok(matchingService.searchPlaceList(place));
     }
 
-    @GetMapping("/api/matching")
+    @PostMapping("/api/matching")
     public ResponseEntity<MatchingResponse> doAutoMatch(@RequestBody @Valid MatchingRequest matchingRequest,
                                                         @RequestHeader("userUuid") String userUuid){
 
@@ -63,7 +63,7 @@ public class MatchingController {
     private List<PostMatchingResponse> getPostMatchingResponse(MatchingRequest matchingRequest, String userUuid){
         return postServiceClient.getPostMatchingData(
                 PostMatchingRequest.getInstance(
-                        getStacks(userUuid), getAddress(matchingRequest), matchingRequest)
+                        getStacks(userUuid), getAddress(matchingRequest), matchingRequest,userUuid)
                 ).getBody();
     }
 

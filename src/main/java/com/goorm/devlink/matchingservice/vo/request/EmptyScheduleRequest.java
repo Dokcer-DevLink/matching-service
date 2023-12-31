@@ -3,7 +3,9 @@ package com.goorm.devlink.matchingservice.vo.request;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,6 +15,7 @@ import java.util.List;
 public class EmptyScheduleRequest {
 
     List<String> userUuidList;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime startTime;
     private Integer unitTimeCount;
 
