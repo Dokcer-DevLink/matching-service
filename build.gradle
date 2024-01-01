@@ -31,7 +31,7 @@ repositories {
 }
 
 bootJar {
-	archiveFileName = 'post-service.jar'
+	archiveFileName = 'matching-service.jar'
 }
 
 ext {
@@ -39,28 +39,16 @@ ext {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation group: 'org.json', name: 'json', version: '20230227'
 	implementation 'com.google.code.gson:gson'
 
 	implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.3.8'
 
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-	// QueryDSL
-	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
-	implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
-	implementation "com.querydsl:querydsl-core:${queryDslVersion}"
-
-	//Redis
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	// SpringCloud 및 Kubernetes
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -83,31 +71,3 @@ dependencyManagement {
 tasks.named('test') {
 	useJUnitPlatform()
 }
-
-
-//QueryDSL 플로그인 설정 START
-
-def querydslDir = "$buildDir/generated/querydsl" //QueryDSL로 생성된 소스가 저장되는 위치
-
-querydsl {
-	jpa = true //JPA 사용여부 설정
-	querydslSourcesDir = querydslDir
-}
-
-sourceSets {
-	main.java.srcDir querydslDir// 빌드시 컴파일이 필요한 소스위치
-}
-
-//QueryDSL 컴파일시 참조할 설정정보
-compileQuerydsl{
-	options.annotationProcessorPath = configurations.querydsl
-}
-
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-	querydsl.extendsFrom compileClasspath //외부라이브러리 컴파일 경로 상속
-}
-
-//QueryDSL 플로그인 설정 END
