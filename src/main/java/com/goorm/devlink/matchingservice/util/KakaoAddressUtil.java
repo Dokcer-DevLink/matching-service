@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import com.goorm.devlink.matchingservice.config.properties.vo.KakaoAddressVo;
 import com.goorm.devlink.matchingservice.dto.Address;
 import com.goorm.devlink.matchingservice.vo.response.SearchPlaceResponse;
-import io.netty.util.CharsetUtil;
+import kotlin.text.Charsets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -50,7 +50,7 @@ public class KakaoAddressUtil {
     private URI url(String location){
         return UriComponentsBuilder.fromHttpUrl(kakaoAddressVo.getUrl())
                 .queryParam("query",location)
-                .encode(CharsetUtil.UTF_8)
+                .encode(Charsets.UTF_8)
                 .build()
                 .toUri();
     }
