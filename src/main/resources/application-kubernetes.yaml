@@ -28,7 +28,7 @@ spring:
   kakao:
     address:
       secretKey: ${KAKAO_SECRET_KEY}
-      url: https://dapi.kakao.com/v2/local/search/address
+      url: https://dapi.kakao.com/v2/local/search/keyword
 
 eureka:
   client:
