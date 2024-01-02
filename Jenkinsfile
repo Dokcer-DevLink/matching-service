@@ -80,7 +80,7 @@ stage('K8S Manifest Update') {
                     sh "git config --global user.email ${gitEmail}"
                     sh "git config --global user.name ${gitName}"
 
-                    sh "sed -i 's/matching-service:.*\$/matching-service:${currentBuild.number}/' ./eks/mentoring-service.yaml"
+                    sh "sed -i 's/matching-service:.*\$/matching-service:${currentBuild.number}/' ./eks/matching-service.yaml"
                     sh "git add ."
                     sh "git commit -m '[UPDATE] Matching-Service K8S ${currentBuild.number} image versioning'"
                     withCredentials([gitUsernamePassword(credentialsId: githubCredential, gitToolName: 'git-tool')]) {
