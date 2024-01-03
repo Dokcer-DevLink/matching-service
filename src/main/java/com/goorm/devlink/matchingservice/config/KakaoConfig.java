@@ -18,7 +18,7 @@ public class KakaoConfig {
 
     @Bean
     public KakaoAddressVo kakaoAddressVo(){
-        return new KakaoAddressVo(kakaoAddressProperties.getSecretKey(), kakaoAddressProperties.getUrl());
+        return new KakaoAddressVo(kakaoAddressProperties.getSecretKey(), kakaoAddressProperties.getKeywordUrl(),kakaoAddressProperties.getAddressUrl());
     }
 
     @Bean

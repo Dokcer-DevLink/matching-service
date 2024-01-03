@@ -12,7 +12,8 @@ spring:
   kakao:
     address:
       secretKey: ${KAKAO_SECRET_KEY}
-      url: https://dapi.kakao.com/v2/local/search/keyword
+      keywordUrl: https://dapi.kakao.com/v2/local/search/keyword
+      addressUrl: https://dapi.kakao.com/v2/local/search/address
 
 eureka:
   client:

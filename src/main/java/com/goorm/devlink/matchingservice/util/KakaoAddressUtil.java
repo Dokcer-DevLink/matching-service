@@ -27,19 +27,19 @@ public class KakaoAddressUtil {
 
     public List<SearchPlaceResponse> findAddressList(String place){
         // 에러처리 필요
-        String response = restTemplate.exchange(request(place),String.class).getBody();
+        String response = restTemplate.exchange(request(place,kakaoAddressVo.getKeywordUrl()),String.class).getBody();
         return parseResponseForList(response);
 
     }
     
-    public Address getAddressInfo(String place){
-        String response = restTemplate.exchange(request(place),String.class).getBody();
+    public Address getAddressInfo(String address){
+        String response = restTemplate.exchange(request(address,kakaoAddressVo.getAddressUrl()),String.class).getBody();
         return parseResponseForAddress(response);
 
     }
 
-    private RequestEntity request(String location){
-        return new RequestEntity(headers(), HttpMethod.GET,url(location));
+    private RequestEntity request(String location,String url){
+        return new RequestEntity(headers(), HttpMethod.GET,url(location,url));
     }
     private HttpHeaders headers(){
         HttpHeaders headers = new HttpHeaders();
@@ -47,8 +47,8 @@ public class KakaoAddressUtil {
         return headers;
     }
 
-    private URI url(String location){
-        return UriComponentsBuilder.fromHttpUrl(kakaoAddressVo.getUrl())
+    private URI url(String location, String url){
+        return UriComponentsBuilder.fromHttpUrl(url)
                 .queryParam("query",location)
                 .encode(StandardCharsets.UTF_8)
                 .build()
@@ -86,9 +86,10 @@ public class KakaoAddressUtil {
     }
 
     private Address convertJsonToAddress(JsonObject jsonObject){
-        String addressName = getValue(jsonObject,"address_name");
-        Double addressX = Double.valueOf(getValue(jsonObject,"x"));
-        Double addressY = Double.valueOf(getValue(jsonObject,"y"));
+        JsonObject addressJson = jsonObject.get("address").getAsJsonObject();
+        Double addressX = Double.valueOf(getValue(addressJson,"x"));
+        Double addressY = Double.valueOf(getValue(addressJson,"y"));
+        String addressName = getValue(addressJson,"address_name");
         return Address.getInstance(addressName,addressX,addressY);
     }
 
