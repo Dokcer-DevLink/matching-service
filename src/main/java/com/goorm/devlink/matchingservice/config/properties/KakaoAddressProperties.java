@@ -13,5 +13,6 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 public class KakaoAddressProperties {
 
     private final String secretKey;
-    private final String url;
+    private final String keywordUrl;
+    private final String addressUrl;
 }

@@ -22,7 +22,7 @@ public class MatchingRequest {
     @JsonProperty("type")
     private MatchingType matchingType;
 
-    @JsonProperty("place")
+    @JsonProperty("address")
     private String mentoringPlace;
 
 

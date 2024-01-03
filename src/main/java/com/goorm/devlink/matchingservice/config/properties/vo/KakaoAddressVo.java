@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 public class KakaoAddressVo {
 
     private final String secretKey;
-    private final String url;
+    private final String keywordUrl;
+    private final String addressUrl;
 
 }

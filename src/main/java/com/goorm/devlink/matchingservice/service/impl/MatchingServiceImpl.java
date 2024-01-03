@@ -21,7 +21,7 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     @Override
-    public Address searchAddress(String place) {
-        return kakaoAddressUtil.getAddressInfo(place);
+    public Address searchAddress(String address) {
+        return kakaoAddressUtil.getAddressInfo(address);
     }
 }
